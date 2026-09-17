@@ -1,6 +1,6 @@
-from datetime import date
+from datetime import date, datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class MovieCreate(BaseModel):
@@ -11,3 +11,17 @@ class MovieCreate(BaseModel):
     poster_path: str | None = None
     vote_average: float | None = None
     runtime: int | None = None
+
+
+class MovieResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    tmdb_id: int
+    title: str
+    overview: str | None
+    release_date: date | None
+    poster_path: str | None
+    vote_average: float | None
+    runtime: int | None
+    updated_at: datetime
