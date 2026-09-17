@@ -1,0 +1,70 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="80" y1="60" x2="430" y2="460" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#211225"/>
+      <stop offset="1" stop-color="#120D16"/>
+    </linearGradient>
+
+    <linearGradient id="play" x1="190" y1="165" x2="324" y2="345" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF4FF"/>
+      <stop offset="0.48" stop-color="#F5B3E8"/>
+      <stop offset="1" stop-color="#C64BE6"/>
+    </linearGradient>
+
+    <linearGradient id="stroke" x1="120" y1="90" x2="430" y2="430" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B84CFF"/>
+      <stop offset="0.5" stop-color="#FF58D6"/>
+      <stop offset="1" stop-color="#7B32B4"/>
+    </linearGradient>
+
+    <linearGradient id="trail" x1="70" y1="370" x2="470" y2="150" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF4DDE" stop-opacity="0"/>
+      <stop offset="0.2" stop-color="#FF65DF" stop-opacity="0.9"/>
+      <stop offset="0.52" stop-color="#FFF0FF"/>
+      <stop offset="0.75" stop-color="#D762FF" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#A33FFF" stop-opacity="0"/>
+    </linearGradient>
+
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+  </defs>
+
+  <!-- Background tile -->
+  <rect x="34" y="34" width="444" height="444" rx="112" fill="url(#bg)"/>
+  <rect x="35.5" y="35.5" width="441" height="441" rx="110.5" stroke="url(#stroke)" stroke-width="3" opacity="0.9" filter="url(#softGlow)"/>
+  <rect x="38" y="38" width="436" height="436" rx="108" stroke="#F08CFF" stroke-opacity="0.35" stroke-width="1.5"/>
+
+  <!-- Film frame -->
+  <rect x="118" y="145" width="276" height="222" rx="42" fill="#2C1730" fill-opacity="0.34" stroke="url(#stroke)" stroke-width="4" filter="url(#softGlow)"/>
+  <rect x="122" y="149" width="268" height="214" rx="38" stroke="#F58CFF" stroke-opacity="0.45" stroke-width="1.5"/>
+
+  <!-- Sprockets -->
+  <g fill="#E59AE7" opacity="0.95">
+    <rect x="140" y="180" width="30" height="30" rx="7"/>
+    <rect x="140" y="241" width="30" height="30" rx="7"/>
+    <rect x="140" y="302" width="30" height="30" rx="7"/>
+    <rect x="342" y="180" width="30" height="30" rx="7"/>
+    <rect x="342" y="241" width="30" height="30" rx="7"/>
+    <rect x="342" y="302" width="30" height="30" rx="7"/>
+  </g>
+
+  <!-- Play -->
+  <path d="M211 191C211 179.8 223.6 173.2 232.9 179.4L321.8 238.4C330.5 244.2 330.5 256.8 321.8 262.6L232.9 321.6C223.6 327.8 211 321.2 211 310V191Z" fill="url(#play)" filter="url(#glow)"/>
+
+  <!-- Light trail glow -->
+  <path d="M54 350C126 391 226 360 314 318C379 287 437 243 472 195"
+        stroke="#FF56D9" stroke-width="24" stroke-linecap="round" opacity="0.18" filter="url(#glow)"/>
+  <path d="M54 350C126 391 226 360 314 318C379 287 437 243 472 195"
+        stroke="url(#trail)" stroke-width="9" stroke-linecap="round" opacity="0.92" filter="url(#softGlow)"/>
+  <path d="M61 346C135 377 228 349 313 308C382 275 433 239 468 198"
+        stroke="#FFF1FF" stroke-width="2.8" stroke-linecap="round" opacity="0.85"/>
+</svg>

@@ -1,0 +1,12 @@
+.search {
+  width: 100%;
+  padding: 18px 22px;
+  background: #2a1f2b;
+  border: 1px solid #493346;
+  font-size: 15px;
+  border-radius: 12px;
+}
+.search svg {
+  margin-right: 13px;
+  color: #f5a9c7;
+}
