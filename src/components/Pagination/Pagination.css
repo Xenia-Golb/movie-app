@@ -1,9 +1,14 @@
-.ant-pagination .ant-pagination-item-active {
-  background-color: #1890ff;
-  border-color: #1890ff;
-  color: #000000a6;
+.ant-pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 44px;
+  flex-wrap: wrap;
+  gap: 4px;
 }
-
+.ant-pagination .ant-pagination-item-active {
+  background: #f5a9c7;
+  border-color: #f5a9c7;
+}
 .ant-pagination .ant-pagination-item-active a {
-  color: #ffffff;
+  color: #301c2a;
 }

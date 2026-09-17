@@ -1,98 +1,34 @@
 /* eslint-disable react/prop-types */
 import s from './MovieList.module.css';
 import Card from '../Card/Card';
-import { format } from 'date-fns';
-import defaultImage from '../../assets/img/defaultImg.png';
 import { useMovieContext } from '../../context/MovieContext';
-import { Rate } from 'antd';
-
-const getRatingColor = (rating) => {
-  if (rating <= 3) return '#E90000';
-  if (rating <= 5) return '#E97E00';
-  if (rating <= 7) return '#E9D100';
-  return '#66E900';
-};
-
 function MovieList({ movies }) {
-  const { rateMovie, genres } = useMovieContext();
-
-  const getGenres = (genreIds) => {
-    return genreIds
-      .map((id) => {
-        const genre = genres.find((genre) => genre.id === id);
-        return genre ? genre.name : null;
-      })
-      .filter((name) => name !== null);
-  };
-
-  const formatDate = (date) => {
-    if (!date) return ' ';
-    const parsedDate = new Date(date);
-    if (isNaN(parsedDate)) return '';
-    return format(parsedDate, 'dd MMM yyyy');
-  };
-
-  function truncateText(text, maxLength = 100) {
-    if (text.length <= maxLength) return text;
-    let truncated = text.slice(0, maxLength);
-
-    const lastSentenceEnd = Math.max(
-      truncated.lastIndexOf('.'),
-      truncated.lastIndexOf('!'),
-      truncated.lastIndexOf('?'),
-    );
-
-    if (lastSentenceEnd !== -1) {
-      truncated = truncated.slice(0, lastSentenceEnd + 1);
-    }
-    return truncated + (truncated.length < text.length ? '..' : '');
-  }
-
+  const { genres } = useMovieContext();
   return (
-    <div className={s['catalog-container']}>
+    <div className={s.grid}>
       {movies.map((movie) => {
-        const imageUrl = movie.poster_path
-          ? `https://image.tmdb.org/t/p/w200${movie.poster_path}`
-          : defaultImage;
-
-        const genreList = getGenres(movie.genre_ids);
-
+        const genre = (movie.genre_ids || [])
+          .map((id) => genres.find((item) => item.id === id)?.name)
+          .filter(Boolean)
+          .slice(0, 2)
+          .join(', ');
         return (
           <Card
             key={movie.id}
-            image={imageUrl}
+            movieId={movie.id}
             title={movie.title}
-            date={formatDate(movie.release_date)}
-            genre={
-              genreList.length > 0 ? (
-                <div className={s.genres}>
-                  {genreList.slice(3).map((genre) => (
-                    <span className={s.genre} key={genre}>
-                      {genre}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                ''
-              )
+            date={movie.release_date?.slice(0, 4)}
+            description={movie.overview}
+            image={
+              movie.poster_path
+                ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+                : null
             }
-            description={truncateText(movie.overview)}
-            className={s['card-movie']}
+            genre={genre}
             rating={
-              <div
-                className={s['rating-circle']}
-                style={{
-                  backgroundColor: getRatingColor(movie.vote_average),
-                }}
-              >
-                {movie.vote_average.toFixed(1)}
-              </div>
-            }
-            addRate={
-              <Rate
-                defaultValue={movie.rating}
-                onChange={(value) => rateMovie(movie, value)}
-              />
+              Number.isFinite(movie.vote_average) && movie.vote_average > 0
+                ? movie.vote_average.toFixed(1)
+                : '—'
             }
           />
         );
@@ -100,5 +36,4 @@ function MovieList({ movies }) {
     </div>
   );
 }
-
 export default MovieList;

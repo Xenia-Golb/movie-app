@@ -1,24 +1,50 @@
 /* eslint-disable react/prop-types */
+import { useState } from 'react';
 import s from './Card.module.css';
-
-function Card({ title, date, description, image, genre, rating, addRate }) {
+function Card({ title, movieId, date, description, image, genre, rating }) {
+  const [failedImage, setFailedImage] = useState(null);
   return (
-    <div className={s['card-movie']}>
-      <img
-        className={s['card-movie__img']}
-        src={image}
-        alt={`${title} poster`}
-      />
-      <div className={s['card-movie__info']}>
-        <h3 className={s['title']}>{title}</h3>
-        <p className={s['date']}>{date}</p>
-        <div className={s['genres']}>{genre}</div>
-        <p className={s['description']}>{description}</p>
-        <div className={s['rate']}>{addRate}</div>
+    <article className={s.card}>
+      <a
+        href={`#movie/${movieId}`}
+        className={s.poster}
+        aria-label={`Подробнее: ${title}`}
+      >
+        {image && failedImage !== image ? (
+          <img
+            src={image}
+            alt={`Постер: ${title}`}
+            loading="lazy"
+            onError={() => setFailedImage(image)}
+          />
+        ) : (
+          <div className={s.fallback}>
+            <span aria-hidden="true">▷</span>
+            <p>{title}</p>
+          </div>
+        )}
+        <div className={s.rating}>
+          ★ <span>{rating}</span>
+        </div>
+        <div className={s.synopsis}>
+          <p>{description || 'Описание пока не добавлено.'}</p>
+        </div>
+      </a>
+      <div className={s.info}>
+        <h3 title={title}>
+          <a href={`#movie/${movieId}`}>{title}</a>
+        </h3>
+        <p className={s.meta}>
+          {date || 'Дата неизвестна'}
+          {genre && (
+            <>
+              <span>·</span>
+              {genre}
+            </>
+          )}
+        </p>
       </div>
-      <div className={s['rating']}>{rating}</div>
-    </div>
+    </article>
   );
 }
-
 export default Card;

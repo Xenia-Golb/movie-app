@@ -1,31 +1,18 @@
 /* eslint-disable react/prop-types */
 import { Pagination } from 'antd';
 import './Pagination.css';
-
-function MyPagination({
-  currentPage,
-  totalPages,
-  loading,
-  setCurrentPage,
-  searchQuery,
-  debouncedFetchData,
-}) {
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-    debouncedFetchData(searchQuery, page);
-  };
-
+function MyPagination({ currentPage, totalPages, loading, setCurrentPage }) {
   return (
     <Pagination
       current={currentPage}
-      total={totalPages * 10}
-      onChange={handlePageChange}
-      pageSize={10}
+      total={totalPages * 20}
+      onChange={setCurrentPage}
+      pageSize={20}
       showSizeChanger={false}
-      hideOnSinglePage={true}
+      hideOnSinglePage
       disabled={loading}
+      showLessItems
     />
   );
 }
-
 export default MyPagination;

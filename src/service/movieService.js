@@ -1,96 +1,66 @@
-const apiKey = import.meta.env.VITE_API_KEY;
-const apiToken = import.meta.env.VITE_API_TOKEN;
-const baseUrl = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&language=en-US&page=`;
-
-export const fetchMovies = async (query, page) => {
-  try {
-    const response = await fetch(`${baseUrl}${page}&query=${query}`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch movies');
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
-
-export const fetchPopularMovies = async () => {
-  const url = 'https://api.themoviedb.org/3/trending/movie/week?language=en-US';
-  const options = {
-    method: 'GET',
-    headers: {
-      Accept: 'application/json',
-      Authorization: `Bearer ${apiToken} `,
-    },
-  };
-
-  try {
-    const response = await fetch(url, options);
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching popular movies:', error);
+const apiKey = '92fe3f0a161cd2c7f0da1ed04da51308';
+const request = async (path, params = {}, options = {}) => {
+  const url = new URL(`https://api.themoviedb.org/3/${path}`);
+  url.search = new URLSearchParams({
+    api_key: apiKey,
+    language: 'ru-RU',
+    ...params,
+  });
+  const response = await fetch(url, options);
+  if (!response.ok) {
+    const error = new Error(
+      'Не удалось связаться с TMDB. Проверьте подключение и попробуйте снова.',
+    );
+    error.status = response.status;
     throw error;
   }
+  return response.json();
 };
 
-if (!apiKey) throw new Error('API ключ не задан');
+export const fetchMovies = (query, page = 1, signal, year = '') =>
+  request(
+    'search/movie',
+    { query, page, ...(year ? { primary_release_year: year } : {}) },
+    { signal },
+  );
 
-export const fetchGenres = async () => {
-  try {
-    const response = await fetch(
-      `https://api.themoviedb.org/3/genre/movie/list?api_key=${apiKey}`,
-    );
-    if (!response.ok) {
-      throw new Error(
-        (await response.json()).status_message || 'Ошибка при получении жанров',
-      );
-    }
-    const data = await response.json();
-    return data.genres;
-  } catch (error) {
-    throw new Error(`Ошибка при получении жанров: ${error.message}`);
+export const discoverMovies = (
+  { year = '', minRating = 0 },
+  page = 1,
+  signal,
+) =>
+  request(
+    'discover/movie',
+    {
+      page,
+      sort_by: 'popularity.desc',
+      ...(year ? { primary_release_year: year } : {}),
+      ...(minRating ? { 'vote_average.gte': minRating } : {}),
+    },
+    { signal },
+  );
+
+export const fetchPopularMovies = (page = 1, signal) =>
+  request('trending/movie/week', { page }, { signal });
+
+export const fetchGenres = async () =>
+  (await request('genre/movie/list')).genres;
+export const createSession = async () =>
+  (await request('authentication/guest_session/new')).guest_session_id;
+export const rateMovie = (movie, value, sessionId) =>
+  request(
+    `movie/${movie.id}/rating`,
+    { guest_session_id: sessionId },
+    {
+      method: value ? 'POST' : 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      ...(value ? { body: JSON.stringify({ value }) } : {}),
+    },
+  );
+
+export const fetchMovieDetails = (movieId, signal) => {
+  if (!/^[1-9]\d*$/.test(String(movieId)) || Number(movieId) > 2147483647) {
+    return Promise.reject(new Error('Некорректный ID фильма.'));
   }
-};
-
-export const createSession = async () => {
-  try {
-    const response = await fetch(
-      `https://api.themoviedb.org/3/authentication/guest_session/new?api_key=${apiKey}`,
-    );
-    if (!response.ok) {
-      throw new Error(
-        (await response.json()).status_message || 'Ошибка при создании сессии',
-      );
-    }
-    const data = await response.json();
-    return data.guest_session_id;
-  } catch (error) {
-    throw new Error(`Ошибка при создании сессии: ${error.message}`);
-  }
-};
-
-export const rateMovie = async (movie, ratingValue, sessionId) => {
-  try {
-    const response = await fetch(
-      `https://api.themoviedb.org/3/movie/${movie.id}/rating?api_key=${apiKey}&guest_session_id=${sessionId}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ value: ratingValue }),
-      },
-    );
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.status_message || 'Failed to rate movie');
-    }
-  } catch (error) {
-    throw new Error(error.message || 'Error in rating movie');
-  }
+  return request(`movie/${movieId}`, {}, { signal });
 };
