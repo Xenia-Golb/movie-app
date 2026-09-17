@@ -8,6 +8,7 @@ from app.schemas import MovieResponse, MoviesResponse
 from app.services import (
     get_movie_from_tmdb,
     get_trending_movies,
+    search_movies,
     upsert_movie,
 )
 
@@ -77,7 +78,17 @@ def get_movies(
 
     finally:
         db.close()
-
+@router.get("/search/tmdb")
+async def search_tmdb_movies(
+    query: str,
+    page: int = 1,
+    year: str | None = None,
+):
+    return await search_movies(
+        query=query,
+        page=page,
+        year=year,
+    )
 @router.get("/{movie_id}", response_model=MovieResponse)
 def get_movie(movie_id: int):
     db: Session = SessionLocal()

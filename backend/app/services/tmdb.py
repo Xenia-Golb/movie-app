@@ -36,3 +36,29 @@ async def get_trending_movies():
         response.raise_for_status()
 
         return response.json()
+async def search_movies(
+    query: str,
+    page: int = 1,
+    year: str | None = None,
+):
+    url = f"{TMDB_BASE_URL}/search/movie"
+
+    params = {
+        "api_key": settings.tmdb_api_key,
+        "language": "ru-RU",
+        "query": query,
+        "page": page,
+    }
+
+    if year:
+        params["primary_release_year"] = year
+
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            url,
+            params=params,
+        )
+
+        response.raise_for_status()
+
+        return response.json()
