@@ -1,1 +1,1 @@
-from app.schemas.movie import MovieCreate, MovieResponse
+from app.schemas.movie import MovieCreate, MovieResponse, MoviesResponse

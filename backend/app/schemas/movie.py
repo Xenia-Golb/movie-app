@@ -25,3 +25,8 @@ class MovieResponse(BaseModel):
     vote_average: float | None
     runtime: int | None
     updated_at: datetime
+class MoviesResponse(BaseModel):
+    items: list[MovieResponse]
+    total: int
+    limit: int
+    offset: int
