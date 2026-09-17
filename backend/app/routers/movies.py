@@ -4,14 +4,19 @@ from sqlalchemy.orm import Session
 
 from app.database import SessionLocal
 from app.models import Movie
-from app.schemas import MovieCreate, MovieResponse
-from app.services import get_movie_from_tmdb, get_trending_movies
+from app.schemas import MovieResponse
+from app.services import (
+    get_movie_from_tmdb,
+    get_trending_movies,
+    upsert_movie,
+)
 
 
 router = APIRouter(
     prefix="/movies",
     tags=["movies"],
 )
+
 
 @router.post("/import/{tmdb_id}", response_model=MovieResponse)
 async def import_movie(tmdb_id: int):
@@ -20,34 +25,11 @@ async def import_movie(tmdb_id: int):
     try:
         tmdb_movie = await get_movie_from_tmdb(tmdb_id)
 
-        existing_movie = db.scalar(
-            select(Movie).where(Movie.tmdb_id == tmdb_id)
+        movie = upsert_movie(
+            db=db,
+            movie_data=tmdb_movie,
         )
 
-        if existing_movie:
-            existing_movie.title = tmdb_movie["title"]
-            existing_movie.overview = tmdb_movie.get("overview")
-            existing_movie.release_date = tmdb_movie.get("release_date") or None
-            existing_movie.poster_path = tmdb_movie.get("poster_path")
-            existing_movie.vote_average = tmdb_movie.get("vote_average")
-            existing_movie.runtime = tmdb_movie.get("runtime")
-
-            db.commit()
-            db.refresh(existing_movie)
-
-            return existing_movie
-
-        movie = Movie(
-            tmdb_id=tmdb_movie["id"],
-            title=tmdb_movie["title"],
-            overview=tmdb_movie.get("overview"),
-            release_date=tmdb_movie.get("release_date") or None,
-            poster_path=tmdb_movie.get("poster_path"),
-            vote_average=tmdb_movie.get("vote_average"),
-            runtime=tmdb_movie.get("runtime"),
-        )
-
-        db.add(movie)
         db.commit()
         db.refresh(movie)
 
@@ -56,15 +38,26 @@ async def import_movie(tmdb_id: int):
     finally:
         db.close()
 
+
 @router.get("", response_model=list[MovieResponse])
-def get_movies():
+def get_movies(
+    limit: int = 20,
+    offset: int = 0,
+):
     db: Session = SessionLocal()
 
     try:
-        result = db.execute(select(Movie))
+        query = (
+            select(Movie)
+            .offset(offset)
+            .limit(limit)
+        )
+
+        result = db.execute(query)
         movies = result.scalars().all()
 
         return movies
+
     finally:
         db.close()
 
@@ -83,8 +76,11 @@ def get_movie(movie_id: int):
             )
 
         return movie
+
     finally:
         db.close()
+
+
 @router.post("/sync-trending")
 async def sync_trending():
     db: Session = SessionLocal()
@@ -93,29 +89,10 @@ async def sync_trending():
         data = await get_trending_movies()
 
         for item in data["results"]:
-            existing_movie = db.scalar(
-                select(Movie).where(
-                    Movie.tmdb_id == item["id"]
-                )
+            upsert_movie(
+                db=db,
+                movie_data=item,
             )
-
-            if existing_movie:
-                existing_movie.title = item["title"]
-                existing_movie.overview = item.get("overview")
-                existing_movie.release_date = item.get("release_date") or None
-                existing_movie.poster_path = item.get("poster_path")
-                existing_movie.vote_average = item.get("vote_average")
-            else:
-                movie = Movie(
-                    tmdb_id=item["id"],
-                    title=item["title"],
-                    overview=item.get("overview"),
-                    release_date=item.get("release_date") or None,
-                    poster_path=item.get("poster_path"),
-                    vote_average=item.get("vote_average"),
-                )
-
-                db.add(movie)
 
         db.commit()
 
