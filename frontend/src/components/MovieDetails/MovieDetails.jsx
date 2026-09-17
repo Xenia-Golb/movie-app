@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState } from 'react';
 import { Alert, Rate } from 'antd';
-import { fetchMovieDetails } from '../../service';
+import { fetchMovieDetails } from '../../api';
 import { useMovieContext } from '../../context/MovieContext';
 import './MovieDetails.css';
 

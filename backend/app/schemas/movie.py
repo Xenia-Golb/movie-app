@@ -30,3 +30,5 @@ class MoviesResponse(BaseModel):
     total: int
     limit: int
     offset: int
+class MovieRating(BaseModel):
+    value: float | None = None

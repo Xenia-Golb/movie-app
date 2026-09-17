@@ -1,1 +1,6 @@
-from app.schemas.movie import MovieCreate, MovieResponse, MoviesResponse
+from app.schemas.movie import (
+    MovieCreate,
+    MovieRating,
+    MovieResponse,
+    MoviesResponse,
+)

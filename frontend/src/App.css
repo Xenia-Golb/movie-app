@@ -102,6 +102,69 @@ nav button.nav-active:after {
   border-radius: 50%;
   background: #f5a9c7;
 }
+.catalog-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+.catalog-title-row h2 {
+  min-width: 0;
+  margin-top: 0;
+}
+.section-heading > div {
+  min-width: 0;
+}
+.sync-button {
+  flex: 0 0 40px;
+
+  width: 40px;
+  height: 40px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 1px solid rgba(245, 169, 199, 0.35);
+  border-radius: 50%;
+
+  background: rgba(38, 28, 38, 0.72);
+
+  color: #f5a9c7;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.sync-button:hover:not(:disabled) {
+  background: rgba(245, 169, 199, 0.08);
+  border-color: rgba(245, 169, 199, 0.7);
+
+  transform: rotate(20deg);
+}
+
+.sync-button:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.sync-button:focus-visible {
+  outline: 2px solid #f5a9c7;
+  outline-offset: 3px;
+}
+
+.sync-button svg {
+  display: block;
+  width: 36px;
+  height: 36px;
+
+  fill: currentColor;
+}
 .intro {
   position: relative;
   min-height: clamp(480px, 70svh, 720px);
@@ -547,5 +610,18 @@ footer > span:last-child {
   }
   .catalog-toolbar .reset-filters {
     justify-self: start;
+  }
+}
+
+.sync-button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+.sync-button[aria-busy='true'] svg {
+  animation: sync-spin 1s linear infinite;
+}
+@keyframes sync-spin {
+  to {
+    transform: rotate(360deg);
   }
 }

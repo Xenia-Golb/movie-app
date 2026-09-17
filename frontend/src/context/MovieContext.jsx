@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { fetchGenres, createSession, rateMovie } from '../service/index';
+import { fetchGenres, createSession, rateMovie } from '../api';
 const MovieContext = createContext();
 export const useMovieContext = () => useContext(MovieContext);
 const storageKey = 'frame-rated-movies';

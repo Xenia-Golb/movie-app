@@ -2,10 +2,16 @@ import { useEffect, useState, useRef } from 'react';
 import { ConfigProvider, theme, Alert } from 'antd';
 import { MovieList, MyInput, MyPagination } from './components';
 import { useMovieContext } from './context/MovieContext';
-import { fetchMovies, fetchPopularMovies, discoverMovies } from './service';
+import {
+  fetchMovies,
+  fetchPopularMovies,
+  discoverMovies,
+  syncAllMovies,
+} from './api';
 import ColorBends from '@components/ColorBends';
 import MovieDetails from './components/MovieDetails/MovieDetails';
 import './App.css';
+import Reload from './assets/icons/reload.svg?react';
 
 function App() {
   const [movieId, setMovieId] = useState(
@@ -46,6 +52,31 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [retry, setRetry] = useState(0);
+  const [syncing, setSyncing] = useState(false);
+  const [syncNotice, setSyncNotice] = useState(null);
+  const syncInFlight = useRef(false);
+  const handleSync = async () => {
+    if (syncInFlight.current) return;
+    syncInFlight.current = true;
+    setSyncing(true);
+    setSyncNotice(null);
+    try {
+      const { updated } = await syncAllMovies();
+      setSyncNotice({
+        type: 'success',
+        message: `Обновлено фильмов: ${updated}`,
+      });
+      setRetry((value) => value + 1);
+    } catch {
+      setSyncNotice({
+        type: 'error',
+        message: 'Не удалось обновить базу фильмов. Попробуйте ещё раз.',
+      });
+    } finally {
+      syncInFlight.current = false;
+      setSyncing(false);
+    }
+  };
   const [genre, setGenre] = useState('Все жанры');
   const { genres } = useMovieContext();
   const [year, setYear] = useState('');
@@ -236,18 +267,38 @@ function App() {
                           ? 'ПОИСК ПО КАТАЛОГУ'
                           : 'В ЦЕНТРЕ ВНИМАНИЯ'}
                     </span>
-                    <h2 id="catalog-title">
-                      {tab === 'watched'
-                        ? 'Просмотренное'
-                        : tab === 'rated'
-                          ? 'Мои оценки'
-                          : query.trim()
-                            ? `Результаты для «${query.trim()}»`
-                            : year || minRating > 0
-                              ? 'Фильмы по вашим условиям'
-                              : 'Популярно на этой неделе'}
-                      <span className="heading-dot">.</span>
-                    </h2>
+                    <div className="catalog-title-row">
+                      <h2 id="catalog-title">
+                        {tab === 'watched'
+                          ? 'Просмотренное'
+                          : tab === 'rated'
+                            ? 'Мои оценки'
+                            : query.trim()
+                              ? `Результаты для «${query.trim()}»`
+                              : year || minRating > 0
+                                ? 'Фильмы по вашим условиям'
+                                : 'Популярно на этой неделе'}
+                      </h2>
+                      <button
+                        className="sync-button"
+                        type="button"
+                        onClick={handleSync}
+                        disabled={syncing}
+                        aria-busy={syncing}
+                        aria-label={
+                          syncing
+                            ? 'Обновление базы фильмов'
+                            : 'Обновить базу фильмов'
+                        }
+                        title={
+                          syncing
+                            ? 'Обновление базы фильмов…'
+                            : 'Обновить базу фильмов'
+                        }
+                      >
+                        <Reload aria-hidden="true" />
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <div
@@ -319,6 +370,15 @@ function App() {
                   )}
                 </div>
               </div>
+              {syncNotice && (
+                <Alert
+                  type={syncNotice.type}
+                  message={syncNotice.message}
+                  showIcon
+                  role="status"
+                  className="notice"
+                />
+              )}
               {(ratingError || watchedError) && (
                 <Alert
                   type="warning"

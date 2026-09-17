@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { fetchMovies } from '../service/index';
+import { fetchMovies } from '../api';
 
 const useFetchMovies = () => {
   const [movies, setMovies] = useState([]);
